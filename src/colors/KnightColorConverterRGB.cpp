@@ -25,3 +25,16 @@ KnightColor KnightColorConverterRGB::TransformFrom(KnightColorRGB currentKnightC
 	KnightColor ac(red, green, blue,0.0f, currentKnightColor.get_alpha());
 	return ac;
 }
+
+ofColor KnightColorConverterRGB::GetColor(KnightColor currentKnightColor) {
+	return ofColor(currentKnightColor.get_value1(), currentKnightColor.get_value2(), currentKnightColor.get_value3(), currentKnightColor.get_alpha());
+}
+
+std::vector<ofParameter<float>> KnightColorConverterRGB::getParameters(KnightColor currentKnightColor)  {
+	std::vector<ofParameter<float>> params;
+	params.push_back(ofParameter<float>("Red", currentKnightColor.get_value1(), 0.0f, 255.0f));
+	params.push_back(ofParameter<float>("Green", currentKnightColor.get_value2(), 0.0f, 255.0f));
+	params.push_back(ofParameter<float>("Blue", currentKnightColor.get_value3(), 0.0f, 255.0f));
+	params.push_back(ofParameter<float>("Alpha", currentKnightColor.get_alpha(), 0.0f, 255.0f));
+	return params;
+}

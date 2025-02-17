@@ -14,6 +14,7 @@
 #include <ofxImGui.h>
 
 
+
 class UserInterface {
 
 public:
@@ -31,7 +32,7 @@ public:
 
 private:
     ofxImGui::Gui m_gui;
-
+    
     ofTexture m_textureToolbarNewLevel;
     ofTexture m_textureToolbarLoadLevel;
     ofTexture m_textureToolbarSaveLevel;
@@ -45,6 +46,7 @@ private:
     void draw_status();
     void draw_properties();
     void draw_viewports();
+	void draw_color_setup();
 
     // Callback functions
 
@@ -57,14 +59,13 @@ private:
     void on_history_redo();
 
 	// Knight color setup
-    float v1;
-	float v2;
-	float v3;
-	float v4;
-    int alpha;
+    
 	KnightColorConverter* converter = new KnightColorConverterRGB();
 	KnightColorRGB currentColorRGB;
+    std::vector<ofParameter<float>> colorParameters;
     void knight_color_setup();
+    void change_color_converter(KnightColorConverter* knightColorConverter);
+    std::vector<float> getColorParameterValues() const;
 
 
 };

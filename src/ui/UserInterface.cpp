@@ -39,17 +39,11 @@ void UserInterface::setup() {
 }
 
 void UserInterface::knight_color_setup(){
-    v1 = rand() % 255 + 1;
-    v2 = rand() % 255 + 1;
-    v3 = rand() % 255 + 1;
-    v1 = 212;
-    v2 = 175;
-    v3 = 55;
-
     converter = new KnightColorConverterRGB();
-	std::string s = converter->get_name();
-    currentColorRGB = KnightColorRGB(v1, v2, v3, 255);
-    currentColorRGB = converter->TransformTo(KnightColor(v1, v2, v3, v4, 255));
+    KnightColor kc = KnightColor(rand() % 255 + 1, rand() % 255 + 1, rand() % 255 + 1, 0.0f, 255);
+    currentColorRGB = converter->TransformTo(kc);
+    colorParameters.clear();
+    colorParameters = converter->getParameters(kc);
 }
 
 
@@ -64,6 +58,7 @@ void UserInterface::draw() {
  draw_toolbar();
  draw_tree();
  draw_properties();
+ draw_color_setup();
  draw_viewports();
  draw_status();
 
@@ -122,43 +117,13 @@ void UserInterface::draw_menu() {
 
   if (ImGui::BeginMenu("Knight Color")) {
       if (ImGui::MenuItem("RGB")) {
-          currentColorRGB = converter->TransformTo(KnightColor(v1, v2, v3, v4, 255));
-          converter = new KnightColorConverterRGB();
-          KnightColor ac = converter->TransformFrom(currentColorRGB);
-          v1 = ac.get_value1();
-          v2 = ac.get_value2();
-          v3 = ac.get_value3();
-          v4 = ac.get_value4();
+		  change_color_converter(new KnightColorConverterRGB());
       }
       if (ImGui::MenuItem("CYMK")) {
-		  std::string s = converter->get_name();
-          currentColorRGB = converter->TransformTo(KnightColor(v1, v2, v3, v4, 255));
-          converter = new KnightColorConverterCYMK();
-          KnightColor ac = converter->TransformFrom(currentColorRGB);
-          v1 = ac.get_value1();
-          v2 = ac.get_value2();
-          v3 = ac.get_value3();
-          v4 = ac.get_value4();
+          change_color_converter(new KnightColorConverterCYMK());
       }
       if (ImGui::MenuItem("HSV")) {
-          currentColorRGB = converter->TransformTo(KnightColor(v1, v2, v3, v4, 255));
-          converter = new KnightColorConverterHSV();
-          KnightColor ac = converter->TransformFrom(currentColorRGB);
-          v1 = ac.get_value1();
-          v2 = ac.get_value2();
-          v3 = ac.get_value3();
-          v4 = ac.get_value4();
-      }
-      if (ImGui::MenuItem("Generate random color")) {
-          v1 = rand() % 255 + 1;
-          v2 = rand() % 255 + 1;
-          v3 = rand() % 255 + 1;
-          currentColorRGB = KnightColorRGB(v1, v2, v3, 255);
-          KnightColor ac = converter->TransformFrom(currentColorRGB);
-          v1 = ac.get_value1();
-          v2 = ac.get_value2();
-          v3 = ac.get_value3();
-          v4 = ac.get_value4();
+          change_color_converter(new KnightColorConverterHSV());
       }
       ImGui::EndMenu();
   }
@@ -255,11 +220,13 @@ void UserInterface::draw_tree() {
 /**
 * Draw properties for a selected node
 */
+
+
 void UserInterface::draw_properties() {
 
  int posY = ImGui::GetFrameHeight() + TOOLBAR_HEIGHT + TREEVIEW_HEIGHT + 8;
  ImGui::SetNextWindowPos(ImVec2(0, posY));
- ImGui::SetNextWindowSize(ImVec2(LEFTPANEL_WIDTH, ofGetHeight() - STATUSBAR_HEIGHT - posY - 2));
+ ImGui::SetNextWindowSize(ImVec2(LEFTPANEL_WIDTH, ofGetHeight() - STATUSBAR_HEIGHT - posY - 230));
 
  ImGui::Begin("Properties", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 
@@ -284,26 +251,39 @@ void UserInterface::draw_properties() {
  ImGui::SameLine(100);
  ImGui::Checkbox("", &isActive);
 
- ImGui::Text("value 1");
- ImGui::SameLine(100);
- ImGui::InputFloat("", &v1);
 
- ImGui::Text("value 2");
- ImGui::SameLine(100);
- ImGui::InputFloat("", &v2);
-
- ImGui::Text("value 3");
- ImGui::SameLine(100);
- ImGui::InputFloat("", &v3);
-
- ImGui::Text("value 4");
- ImGui::SameLine(100);
- ImGui::InputFloat("", &v4);
-
- ImGui::End();  // End of the property list window
+ ImGui::End();
 
 }
 
+
+void UserInterface::draw_color_setup() {
+    int posY = ImGui::GetFrameHeight() + TOOLBAR_HEIGHT + TREEVIEW_HEIGHT + TREEVIEW_HEIGHT + 100;
+    ImGui::SetNextWindowPos(ImVec2(0, posY));
+    ImGui::SetNextWindowSize(ImVec2(LEFTPANEL_WIDTH, ofGetHeight() - STATUSBAR_HEIGHT - posY - 2), ImGuiCond_Always);
+
+    ImGui::Begin("Colors", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+  
+   
+   for (auto& param : colorParameters) {
+        ImGui::Text("%s", param.getName().c_str());
+        ImGui::SameLine(80);
+        float value = param.get();
+        ImGui::SliderFloat("", &value, param.getMin(), param.getMax());
+        param.set(value);
+    }
+    std::vector<float> colorValues = getColorParameterValues();
+    currentColorRGB = converter->TransformTo(KnightColor(colorValues[0], colorValues[1], colorValues[2], colorValues[3], colorValues[4]));
+
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    ImVec2 p = ImGui::GetCursorScreenPos();
+    ImVec2 center = ImVec2(p.x + 50, p.y + 50); // Center of the circle
+    float radius = 50.0f; // Radius of the circle
+    ImU32 color = IM_COL32(currentColorRGB.get_red(), currentColorRGB.get_green(), currentColorRGB.get_blue(), currentColorRGB.get_alpha()); // Red color
+    draw_list->AddCircleFilled(center, radius, color);
+    ImGui::End();  // End of the property list window
+
+}
 
 /**
 * Draw the status bar
@@ -378,6 +358,23 @@ void UserInterface::draw_viewports() {
   ImGui::End();
  }
 
+}
+
+std::vector<float> UserInterface::getColorParameterValues() const {
+    std::vector<float> values;
+    for (const auto& param : colorParameters) {
+        values.push_back(param.get());
+    }
+	if (values.size() == 4) {
+		values.push_back(values[3]);
+	}
+    return values;
+}
+void UserInterface::change_color_converter(KnightColorConverter* knightColorConverter) {
+    converter = knightColorConverter;
+    KnightColor kc = converter->TransformFrom(currentColorRGB);
+    colorParameters.clear();
+    colorParameters = converter->getParameters(kc);
 }
 
 

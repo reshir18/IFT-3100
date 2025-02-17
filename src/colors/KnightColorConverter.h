@@ -8,6 +8,11 @@
  *****************************************************/
 #include "KnightColor.h"
 #include "KnightColorRGB.h"
+#include <ofxImGui.h>
+#include <ofColor.h>
+#include <cmath>
+#include <vector>
+
 #pragma once
 class KnightColorConverter
 {
@@ -17,7 +22,8 @@ public:
 	KnightColorConverter();
 	virtual KnightColorRGB TransformTo(KnightColor currentKnightColor) = 0;
 	virtual KnightColor TransformFrom(KnightColorRGB currentKnightColor) = 0;
-
+	virtual ofColor GetColor(KnightColor currentKnightColor) = 0;
+	virtual std::vector<ofParameter<float>> getParameters(KnightColor currentKnightColor) = 0;
 	std::string get_name();
 };
 
