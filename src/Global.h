@@ -21,6 +21,8 @@ class Global {
 public:
 
 	static std::array<Camera, 3> m_cameras;
+	static int m_countNodeRender[3];
+
 	static Level m_level;
 	static int m_selectedNode;
 	static bool m_selectedFromViewport;

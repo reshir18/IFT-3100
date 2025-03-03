@@ -12,7 +12,6 @@
 #include "ofMain.h"
 #include "ofxAssimpModelLoader.h"
 #include <vector>
-#include <algorithm>
 
 
 struct ModelNodeAnimationData
@@ -34,8 +33,8 @@ private:
 
 public:
 	explicit ModelNode(const std::string& p_name, const std::string& p_filePath);
-	void draw(bool objectPicking) override;
-	virtual std::vector<NodeProperty> getProperties() const override;
+	int draw(bool objectPicking, Camera* p_camera) override;
+	std::vector<NodeProperty> getProperties() const override;
 	void setProperty(const std::string& p_name, std::any p_value) override;
 	std::string getCurrentAnimationName() const;
 	ofxAssimpModelLoader& getModel();

@@ -11,6 +11,7 @@
 
 // Static allocation
 std::array<Camera, 3> Global::m_cameras;
+int Global::m_countNodeRender[3];
 Level Global::m_level;
 int Global::m_selectedNode = -1;
 TransformTools Global::m_transformTools;
@@ -22,9 +23,10 @@ bool Global::m_selectedFromViewport = false;
  */
 void Global::setup() {
 
-	m_cameras[0].setup(ofVec3f(0, 300, 1500), ofVec3f(0, 300, 0));
-	m_cameras[1].setup(ofVec3f(0, 2000, 0), ofVec3f(0, 0, 0));
-	m_cameras[2].setup(ofVec3f(1500, 300, 0), ofVec3f(0, 300, 0));
+
+	m_cameras[0].setup(ofVec3f(0, 0, 1000), ofVec3f(0, 0, 0));
+	m_cameras[1].setup(ofVec3f(0, 1000, 0), ofVec3f(0, 0, 0));
+	m_cameras[2].setup(ofVec3f(1000, 0, 0), ofVec3f(0, 0, 0));
 
 	m_level.reset();
 

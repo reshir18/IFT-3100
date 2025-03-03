@@ -21,7 +21,7 @@ private:
 
 public:
     explicit CylinderNode(const std::string& p_name);
-    void draw(bool p_objectPicking) override;
+    int draw(bool p_objectPicking, Camera* p_camera) override;
     ofVec3f getBoundingBox() const override;
     void setRadius(float p_radius);
     void setHeight(float p_radius);

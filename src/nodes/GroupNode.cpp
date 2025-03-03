@@ -22,6 +22,7 @@ GroupNode::GroupNode(const std::string& p_name) : BaseNode(p_name) {
 std::vector<NodeProperty> GroupNode::getProperties() const {
     std::vector<NodeProperty> properties;
     properties.emplace_back("Name", PROPERTY_TYPE::TEXT_FIELD, m_name);
+    properties.emplace_back("Display",PROPERTY_TYPE::BOOLEAN_FIELD, m_displayNode);
     properties.emplace_back("Transform", PROPERTY_TYPE::LABEL, nullptr);
     properties.emplace_back("Position", PROPERTY_TYPE::VECTOR3, m_transform.getPosition());
     properties.emplace_back("Orientation", PROPERTY_TYPE::VECTOR3, m_transform.getOrientationEulerDeg());

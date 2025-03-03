@@ -16,8 +16,8 @@
  * Constructor
  */
 CylinderNode::CylinderNode(const std::string& p_name) : BaseNode(p_name) {
-    m_primitive.setRadius(5.0);
-    m_primitive.setHeight(20.0);
+    m_primitive.setRadius(50.0);
+    m_primitive.setHeight(200.0);
     m_primitive.setPosition(0, 0, 0);
     m_primitive.setResolutionRadius(24);
     m_primitive.setResolutionHeight(3);
@@ -27,13 +27,21 @@ CylinderNode::CylinderNode(const std::string& p_name) : BaseNode(p_name) {
 /**
  * Draw node content
  */
-void CylinderNode::draw(bool p_objectPicking) {
+int CylinderNode::draw(bool p_objectPicking, Camera* p_camera) {
+    if (!m_displayNode) return 0;
+    int count = 0;
 
     beginDraw(p_objectPicking);
-    m_transform.transformGL();
-    m_primitive.draw();
-    m_transform.restoreTransformGL();
-    endDraw(p_objectPicking);
+
+    if (p_camera->testVisibility(m_transform.getGlobalPosition(), getBoundingBox())) {
+        m_transform.transformGL();
+        m_primitive.draw();
+        m_transform.restoreTransformGL();
+        count++;
+    }
+
+    count += endDraw(p_objectPicking, p_camera);
+    return count;
 
 }
 
@@ -67,10 +75,10 @@ ofVec3f CylinderNode::getBoundingBox() const {
  */
 std::vector<NodeProperty> CylinderNode::getProperties() const {
     auto properties = BaseNode::getProperties();
-    properties.emplace_back("Radius", PROPERTY_TYPE::FLOAT_TYPE, m_primitive.getRadius());
-    properties.emplace_back("Height", PROPERTY_TYPE::FLOAT_TYPE, m_primitive.getHeight());
-    properties.emplace_back("Resolution R", PROPERTY_TYPE::INTEGER, m_primitive.getResolutionRadius());
-    properties.emplace_back("Resolution H", PROPERTY_TYPE::INTEGER, m_primitive.getResolutionHeight());
+    properties.emplace_back("Radius", PROPERTY_TYPE::FLOAT_FIELD, m_primitive.getRadius());
+    properties.emplace_back("Height", PROPERTY_TYPE::FLOAT_FIELD, m_primitive.getHeight());
+    properties.emplace_back("Resolution R", PROPERTY_TYPE::INT_FIELD, m_primitive.getResolutionRadius());
+    properties.emplace_back("Resolution H", PROPERTY_TYPE::INT_FIELD, m_primitive.getResolutionHeight());
     return properties;
 }
 

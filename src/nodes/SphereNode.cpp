@@ -18,7 +18,7 @@
  * Constructor
  */
 SphereNode::SphereNode(const std::string& p_name) : BaseNode(p_name) {
-	m_primitive.setRadius(10.0);
+	m_primitive.setRadius(100.0);
 	m_primitive.setResolution(16.0);
 	m_primitive.setPosition(0, 0, 0);
 }
@@ -27,14 +27,19 @@ SphereNode::SphereNode(const std::string& p_name) : BaseNode(p_name) {
 /**
  * Draw node content
  */
-void SphereNode::draw(bool p_objectPicking) {
+int SphereNode::draw(bool p_objectPicking, Camera* p_camera) {
+    if (!m_displayNode) return 0;
+    int count = 0;
+    beginDraw(p_objectPicking);
 
-	beginDraw(p_objectPicking);
-	m_transform.transformGL();
-	m_primitive.draw();
-	m_transform.restoreTransformGL();
-	endDraw(p_objectPicking);
-
+    if (p_camera->testVisibility(m_transform.getGlobalPosition(), getBoundingBox())) {
+        m_transform.transformGL();
+        m_primitive.draw();
+        m_transform.restoreTransformGL();
+        count++;
+    }
+	count += endDraw(p_objectPicking, p_camera);
+    return count;
 }
 
 
@@ -59,8 +64,8 @@ ofVec3f SphereNode::getBoundingBox() const {
  */
 std::vector<NodeProperty> SphereNode::getProperties() const {
     auto properties = BaseNode::getProperties();
-    properties.emplace_back("Radius", PROPERTY_TYPE::FLOAT_TYPE, m_primitive.getRadius());
-    properties.emplace_back("Resolution", PROPERTY_TYPE::INTEGER, m_primitive.getResolution());
+    properties.emplace_back("Radius", PROPERTY_TYPE::FLOAT_FIELD, m_primitive.getRadius());
+    properties.emplace_back("Resolution", PROPERTY_TYPE::INT_FIELD, m_primitive.getResolution());
     return properties;
 }
 

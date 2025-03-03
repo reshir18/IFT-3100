@@ -23,7 +23,7 @@ public:
 	void reset();
 	bool loadFromFile(const std::string& p_filename);
 	bool saveToFile(const std::string& p_filename);
-	void draw(bool p_objectPicking);
+	int draw(bool p_objectPicking, Camera* p_camera);
 
 };
 

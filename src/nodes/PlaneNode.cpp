@@ -17,8 +17,8 @@
  * Constructor
  */
 PlaneNode::PlaneNode(const std::string &p_name) : BaseNode(p_name) {
-    m_primitive.setWidth(20.0f);
-    m_primitive.setHeight(20.0f);
+    m_primitive.setWidth(200.0f);
+    m_primitive.setHeight(200.0f);
     m_primitive.setPosition(0, 0, 0);
 }
 
@@ -26,12 +26,21 @@ PlaneNode::PlaneNode(const std::string &p_name) : BaseNode(p_name) {
 /**
  * Draw node content
  */
-void PlaneNode::draw(bool p_objectPicking) {
+int PlaneNode::draw(bool p_objectPicking, Camera* p_camera) {
+    if (!m_displayNode) return 0;
+    int count = 0;
+
     beginDraw(p_objectPicking);
-    m_transform.transformGL();
-    m_primitive.draw();
-    m_transform.restoreTransformGL();
-    endDraw(p_objectPicking);
+
+    if (p_camera->testVisibility(m_transform.getGlobalPosition(), getBoundingBox())) {
+        m_transform.transformGL();
+        m_primitive.draw();
+        m_transform.restoreTransformGL();
+        count++;
+    }
+
+    count = endDraw(p_objectPicking, p_camera);
+    return count;
 }
 
 
@@ -73,9 +82,9 @@ ofVec3f PlaneNode::getBoundingBox() const {
  */
 std::vector<NodeProperty> PlaneNode::getProperties() const {
     auto properties = BaseNode::getProperties();
-    properties.emplace_back("Width", PROPERTY_TYPE::FLOAT_TYPE, m_primitive.getWidth());
-    properties.emplace_back("Height", PROPERTY_TYPE::FLOAT_TYPE, m_primitive.getHeight());
-    properties.emplace_back("Resolution", PROPERTY_TYPE::INTEGER, static_cast<int>(m_primitive.getResolution().x));
+    properties.emplace_back("Width", PROPERTY_TYPE::FLOAT_FIELD, m_primitive.getWidth());
+    properties.emplace_back("Height", PROPERTY_TYPE::FLOAT_FIELD, m_primitive.getHeight());
+    properties.emplace_back("Resolution", PROPERTY_TYPE::INT_FIELD, static_cast<int>(m_primitive.getResolution().x));
     return properties;
 }
 

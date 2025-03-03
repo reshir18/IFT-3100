@@ -12,19 +12,19 @@ TransformTools::TransformTools() {
     m_materialUnlit.setAmbientColor(ofFloatColor(0.0, 0.0, 0.0));
     m_materialUnlit.setDiffuseColor(ofFloatColor(0.0));
     m_materialUnlit.setSpecularColor(ofFloatColor(0.0));
-    m_conePrimitives[0].setScale(0.02);
+    m_conePrimitives[0].setScale(0.3);
     m_conePrimitives[0].setOrientation(glm::vec3(0, 0, 90));
-    m_conePrimitives[1].setScale(0.02);
+    m_conePrimitives[1].setScale(0.3);
     m_conePrimitives[1].setOrientation(glm::vec3(180, 0, 0));
-    m_conePrimitives[2].setScale(0.02);
+    m_conePrimitives[2].setScale(0.3);
     m_conePrimitives[2].setOrientation(glm::vec3(-90, 0, 0));
-    m_spherePrimitives[0].setScale(0.02);
-    m_spherePrimitives[1].setScale(0.02);
-    m_spherePrimitives[2].setScale(0.02);
-    m_cubePrimitives[0].setScale(0.01);
-    m_cubePrimitives[1].setScale(0.01);
-    m_cubePrimitives[2].setScale(0.01);
-    m_cubePrimitives[3].setScale(0.02);
+    m_spherePrimitives[0].setScale(0.3);
+    m_spherePrimitives[1].setScale(0.3);
+    m_spherePrimitives[2].setScale(0.3);
+    m_cubePrimitives[0].setScale(0.15);
+    m_cubePrimitives[1].setScale(0.15);
+    m_cubePrimitives[2].setScale(0.15);
+    m_cubePrimitives[3].setScale(0.15);
 
 }
 
@@ -229,16 +229,16 @@ void TransformTools::onMouseDrag(ImVec2 mousePosition) {
     // Get difference between previous mouse position and current one
     glm::vec2 diff = mousePosition - m_previousMousePosition;
     m_previousMousePosition = mousePosition;
-    float mouseSpeedTranslate = 0.05f;
-    float mouseSpeedRotate = 0.25f;
-    float mouseSpeedScale = 0.01f;
+    float mouseSpeedTranslate = 0.5f;
+    float mouseSpeedRotate = 0.5f;
+    float mouseSpeedScale = 0.025f;
 
     BaseNode* node = Global::m_level.getTree()->findNode(Global::m_selectedNode);
 
     // Access the camera's view matrix
-    glm::vec3 cameraRight = Global::m_cameras[m_camera_index].getCamera().getXAxis();
-    glm::vec3 cameraUp = Global::m_cameras[m_camera_index].getCamera().getYAxis();
-    glm::vec3 cameraForward = Global::m_cameras[m_camera_index].getCamera().getZAxis();
+    glm::vec3 cameraRight = Global::m_cameras[m_camera_index].getCamera()->getXAxis();
+    glm::vec3 cameraUp = Global::m_cameras[m_camera_index].getCamera()->getYAxis();
+    glm::vec3 cameraForward = Global::m_cameras[m_camera_index].getCamera()->getZAxis();
 
 
     // Depending on the selected axis, update the position

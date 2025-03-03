@@ -11,7 +11,7 @@
 #include "Application.h"
 #include "MainWindow.h"
 #include <ofAppRunner.h>
-
+#include <glm/gtx/string_cast.hpp>
 
  /**
   * Start application

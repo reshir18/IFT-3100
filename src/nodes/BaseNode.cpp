@@ -33,13 +33,30 @@ BaseNode::BaseNode(const std::string& p_name) : m_name(p_name) {
 
 
 /**
+ * Destructor
+ */
+BaseNode::~BaseNode() {
+
+	ofLog() << "Delete base node: " << m_name;
+	for (BaseNode* child : m_children) {
+		delete child;
+	}
+
+	m_children.clear();
+
+}
+
+
+/**
  * Draw node content
  */
-void BaseNode::draw(bool p_objectPicking) {
+int BaseNode::draw(bool p_objectPicking, Camera* p_camera) {
+
+	if (!m_displayNode) return 0;
 
 	beginDraw(p_objectPicking);
 	// Nothing to render
-	endDraw(p_objectPicking);
+	return endDraw(p_objectPicking, p_camera);
 
 }
 
@@ -65,7 +82,29 @@ void BaseNode::displayBoundingBox(bool display) {
  */
 void BaseNode::addChild(BaseNode* p_child) {
 	p_child->m_transform.setParent(m_transform);
+	p_child->setParent(this);
 	m_children.push_back(p_child);
+}
+
+
+/**
+* Swap child order
+*/
+void BaseNode::swapChildOrder(BaseNode* p_child1, BaseNode* p_child2) {
+
+	std::vector<BaseNode *> temp_children;
+
+	for (BaseNode* child : m_children) {
+		if (child == p_child1) {
+			temp_children.push_back(p_child2);
+		} else if (child == p_child2) {
+			temp_children.push_back(p_child1);
+		} else {
+			temp_children.push_back(child);
+		}
+	}
+
+	m_children = temp_children;
 }
 
 
@@ -76,6 +115,7 @@ std::vector<NodeProperty> BaseNode::getProperties() const {
 
 	std::vector<NodeProperty> properties;
 	properties.emplace_back("Name", PROPERTY_TYPE::TEXT_FIELD, m_name);
+	properties.emplace_back("Display",PROPERTY_TYPE::BOOLEAN_FIELD, m_displayNode);
 	properties.emplace_back("Transform", PROPERTY_TYPE::LABEL, nullptr);
 	properties.emplace_back("Position", PROPERTY_TYPE::VECTOR3, m_transform.getPosition());
 	properties.emplace_back("Orientation", PROPERTY_TYPE::VECTOR3, m_transform.getOrientationEulerDeg());
@@ -97,6 +137,10 @@ std::vector<NodeProperty> BaseNode::getProperties() const {
 void BaseNode::setProperty(const std::string& p_name, std::any p_value) {
 	if (p_name == "Name") {
 		m_name = std::any_cast<std::string>(p_value);
+	}
+
+	if (p_name == "Display") {
+		m_displayNode = std::any_cast<bool>(p_value);
 	}
 
 	if (p_name == "Position") {
@@ -145,6 +189,41 @@ BaseNode* BaseNode::findNode(int p_id) {
 
 
 /**
+ * Set parent node
+ */
+void BaseNode::setParent(BaseNode* p_parentNode) {
+	m_parentNode = p_parentNode;
+}
+
+
+/**
+* Get parent node
+*/
+BaseNode* BaseNode::getParent() {
+	return m_parentNode;
+}
+
+
+/**
+ * Remove child
+ */
+void BaseNode::removeChild(int p_index) {
+
+	int index = 0;
+	for (BaseNode* child : m_children) {
+		if (child->getId() == p_index) {
+			delete child;
+			m_children.erase(m_children.begin() + index);
+			return;
+		}
+		index++;
+	}
+
+
+}
+
+
+/**
  * Begin draw context
  */
 void BaseNode::beginDraw(bool p_objectPicking) {
@@ -162,7 +241,8 @@ void BaseNode::beginDraw(bool p_objectPicking) {
 /**
  * End draw context
  */
-void BaseNode::endDraw(bool p_objectPicking) {
+int BaseNode::endDraw(bool p_objectPicking, Camera* p_camera) {
+	int count = 0;
 	if (!p_objectPicking) {
 		m_materialNode.end();
 
@@ -174,9 +254,25 @@ void BaseNode::endDraw(bool p_objectPicking) {
 	}
 
 	for (BaseNode* child : m_children) {
-		child->draw(p_objectPicking);
+		count += child->draw(p_objectPicking, p_camera);
 	}
+	return count;
+}
 
+
+/**
+ * Get display node
+ */
+bool BaseNode::getDisplayNode() const {
+	return m_displayNode;
+}
+
+
+/**
+ * Set display node
+ */
+void BaseNode::displayNode(bool p_display) {
+	m_displayNode = p_display;
 }
 
 
@@ -184,7 +280,7 @@ void BaseNode::endDraw(bool p_objectPicking) {
  * Get bounding box for current node
  */
 ofVec3f BaseNode::getBoundingBox() const {
-	return {1.0, 1.0, 1.0};
+	return {10.0, 10.0, 10.0};
 }
 
 
@@ -198,4 +294,35 @@ void BaseNode::drawBoundingBox() {
 	ofDrawBox(glm::vec3(0, 0, 0), boundingBox.x, boundingBox.y, boundingBox.z);
 	m_transform.restoreTransformGL();
 
+}
+
+
+/**
+* Get previous node
+*/
+BaseNode* BaseNode::getPreviousNode() {
+
+	BaseNode* parent = getParent();
+	for  (int i=0;i<parent->m_children.size();i++) {
+		if (parent->m_children[i] == this) {
+			if (i > 0) return parent->m_children[i-1];
+		}
+	}
+
+	return nullptr;
+}
+
+
+/**
+* Get next node
+*/
+BaseNode* BaseNode::getNextNode() {
+	BaseNode* parent = getParent();
+	for  (int i=0;i<parent->m_children.size();i++) {
+		if (parent->m_children[i] == this) {
+			if (i+1 < parent->m_children.size()) return parent->m_children[i+1];
+		}
+	}
+
+	return nullptr;
 }

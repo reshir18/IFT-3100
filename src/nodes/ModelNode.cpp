@@ -14,17 +14,27 @@ ModelNode::ModelNode(const std::string& p_name, const std::string& p_filePath) :
 	m_model.loadModel(p_filePath);
 	initPosesList();
 	m_model.setLoopStateForAllAnimations(OF_LOOP_NORMAL);
-	m_model.getAnimation(m_poses.at(getCurrentAnimationID())->m_animationID).play();
+	m_model.setPausedForAllAnimations(true);
+
 	debugPrintNames();
 }
 
 
-void ModelNode::draw(bool p_objectPicking)
+int ModelNode::draw(bool p_objectPicking, Camera* p_camera)
 {
-	//BaseNode::beginDraw(p_objectPicking);
-	m_model.update();
-	m_model.drawFaces();
-	//BaseNode::endDraw(p_objectPicking);
+	int count = 0;
+	beginDraw(p_objectPicking);
+
+	if (p_camera->testVisibility(m_transform.getGlobalPosition(), getBoundingBox())) {
+		m_transform.transformGL();
+		m_model.update();
+		m_model.drawFaces();
+		m_transform.restoreTransformGL();
+		count++;
+	}
+
+	count += endDraw(p_objectPicking, p_camera);
+	return count;
 }
 
 
@@ -189,6 +199,6 @@ void ModelNode::debugPrintNames() const
 	ofLog() << "- Printing names for [" << m_name << "]";
 	for (auto anim : m_poses)
 	{
-		ofLog() << " --- Anim: " << anim->m_devName << " (Player facing name: " << anim->m_playerFacingName << ")" ;
+		ofLog() << " --- Anim: " << anim->m_animationID << " : " << anim->m_devName << " (Player facing name: " << anim->m_playerFacingName << ")" ;
 	}
 }

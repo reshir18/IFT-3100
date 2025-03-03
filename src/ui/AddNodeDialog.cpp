@@ -25,6 +25,8 @@
  * Constructor
  */
 AddNodeDialog::AddNodeDialog() : ModalDialog() {
+
+    setTitle("Add Node");
 }
 
 

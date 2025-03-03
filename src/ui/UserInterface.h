@@ -12,6 +12,7 @@
 #include <ofxImGui.h>
 #include "Vector3Dialog.h"
 #include "ColorDialog.h"
+#include "DeleteNodeDialog.h"
 
 
 class UserInterface {
@@ -49,12 +50,14 @@ private:
     ofTexture m_textureToolbarGenerateAtlas;
     ofTexture m_textureToolbarToggleCameras;
     ofTexture m_textureToolbarToggleCamerasPressed;
+    ofTexture m_textureNotVisible;
 
     bool m_initialDraw = true;
     bool m_onlyOneCamera = false;
     Vector3Dialog m_vec3Dialog;
 	ColorDialog m_colorDialog;
 	AddNodeDialog m_addNodeDialog;
+	DeleteNodeDialog m_deleteNodeDialog;
 
 
     // Draw functions
@@ -68,6 +71,7 @@ private:
     void drawProperties();
     void drawViewports();
     void drawViewport(const std::string& name, int index, const ImVec2& position, const ImVec2& size);
+	void drawViewportOverlay(int index, const ImVec2& position, int availableWidth, int verticalOffset);
     void drawCursor();
     void changeCursor();
 
