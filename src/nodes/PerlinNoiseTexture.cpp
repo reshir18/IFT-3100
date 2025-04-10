@@ -1,6 +1,7 @@
 #include "PerlinNoiseTexture.h"
 
 #include <algorithm>
+#include <numeric>
 
 PerlinNoiseTexture::PerlinNoiseTexture(unsigned int seed) {
     p.resize(256);

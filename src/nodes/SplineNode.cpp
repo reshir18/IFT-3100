@@ -11,10 +11,8 @@
 
 /* 
 TODO / ideas
-    - add buttons in parameters to show/hide all control points at once
     - and/or show control points only when the spline or another point is selected
     - allow changing the primitive used by a point (could be per point or for all at once)
-    - option to add/insert control points (could have only that option in the AddNodeDialog instead of m_userCanAddChild)
     - option to change the drawing mode (curveTo, bezierTo, etc.)
     - figure out setStrokeWidth (dunno why it works in a test project but not here)
     - draw a spline bounding box so it encompasses all the points maximum position
@@ -67,17 +65,20 @@ void SplineNode::init(int p_controlPointsCount)
 void SplineNode::updatePath() 
 {
     m_path.clear();
-    m_path.setFilled(false);
-    m_path.setStrokeColor(m_materialNode.getAmbientColor());
-    m_path.setStrokeWidth(m_strokeWidth);
 
-    m_path.moveTo(m_children[0]->getTransform().getPosition());
-    m_path.curveTo(m_children[0]->getTransform().getPosition());
-    for (size_t i = 0; i < m_children.size(); i++) {
-        m_path.curveTo(m_children[i]->getTransform().getPosition());
-        m_controlPoints[i]->setIndex(i); //in case a point was deleted
+    if (!m_children.empty()) {
+        m_path.setFilled(false);
+        m_path.setStrokeColor(m_materialNode.getAmbientColor());
+        m_path.setStrokeWidth(m_strokeWidth);
+
+        m_path.moveTo(m_children[0]->getTransform().getPosition());
+        m_path.curveTo(m_children[0]->getTransform().getPosition());
+        for (size_t i = 0; i < m_children.size(); i++) {
+            m_path.curveTo(m_children[i]->getTransform().getPosition());
+            m_controlPoints[i]->setIndex(i); //in case a point was deleted
+        }
+        m_path.curveTo(m_children.back()->getTransform().getPosition());
     }
-    m_path.curveTo(m_children.back()->getTransform().getPosition());
 }
 
 /**
@@ -90,6 +91,7 @@ int SplineNode::draw(bool p_objectPicking, Camera* p_camera)
         updatePath();
     }
     if (!m_displayNode) return 0;
+    if (m_children.empty()) return 0;
 
     int count = 0;
     beginDraw(p_objectPicking, p_camera);
@@ -151,6 +153,7 @@ void SplineNode::nodeChanged(const std::string& p_name, std::any p_value)
     updatePath();
 }
 
+
 std::vector<NodeProperty> SplineNode::getProperties() const
 {
     std::vector<NodeProperty> properties;
@@ -172,5 +175,54 @@ std::vector<NodeProperty> SplineNode::getProperties() const
     properties.emplace_back("Thickness", PROPERTY_TYPE::FLOAT_FIELD, m_strokeWidth);
     properties.emplace_back("Points count", PROPERTY_TYPE::TEXT_INFO, std::to_string(m_children.size()));
 
+    //Control points
+    properties.emplace_back("Control points", PROPERTY_TYPE::LABEL, nullptr);
+    properties.emplace_back("Add", PROPERTY_TYPE::DUMB_BUTTON, true, "Add a new control point");
+    properties.emplace_back("Display all", PROPERTY_TYPE::DUMB_BUTTON, false, "Display all control points at once.");
+    properties.emplace_back("Hide all", PROPERTY_TYPE::DUMB_BUTTON, true, "Hide all control points at once.");
+    
+
     return properties;
+}
+
+
+void SplineNode::setProperty(const std::string& p_name, std::any p_value)
+{
+    if (p_name == "Display all" || 
+        p_name == "Hide all") {
+        setDisplayNodeOnControlPoints(std::any_cast<bool>(p_value));
+        return;
+    }
+    if (p_name == "Add") {
+        glm::vec3 pos = getTransform().getPosition();;
+        int index = 0;
+        if (! m_controlPoints.empty()) {
+            // if there are control points, spawn somewhere near the last one
+            glm::vec3 lastPointPos = m_controlPoints.back()->getTransform().getPosition();
+            pos = glm::vec3(lastPointPos.x + m_DEFAULT_SPACING, lastPointPos.y, -lastPointPos.z);
+            index = m_controlPoints.back()->getIndex() + 1;
+
+        }
+
+        SplineControlPoint* controlPoint = new SplineControlPoint("Control point " + std::to_string(index + 1), pos);
+        addChild(controlPoint);
+        m_controlPoints.push_back(controlPoint);
+        controlPoint->setIndex(index);
+
+        //update the spline
+        updatePath();
+        return;
+    }
+    BaseNode::setProperty(p_name, p_value);
+}
+
+
+/**
+ * Use to set the DisplayNode to the same value on all control points at once
+ */
+void SplineNode::setDisplayNodeOnControlPoints(bool p_value)
+{
+    for (SplineControlPoint* controlPoint : m_controlPoints) {
+        controlPoint->displayNode(p_value);
+    }
 }

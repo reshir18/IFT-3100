@@ -827,6 +827,18 @@ void UserInterface::drawProperties() {
                 }
             }
             break;
+
+            case PROPERTY_TYPE::DUMB_BUTTON: {
+                bool value = std::any_cast<bool>(property.getValue());
+
+                if (ImGui::Button(property.getName().c_str())) {
+                    Global::m_actions.addAction(selectedNode, property.getName(), value, !value);
+                }
+                if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+                    ImGui::SetTooltip(property.getTooltip().c_str());
+                }
+            }
+            break;
         }
 
         count++;

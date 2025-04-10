@@ -36,6 +36,9 @@ public:
 
     std::vector<NodeProperty> getProperties() const override;
     void removeAllChildren() override {}; // This class uses his own housekeeping functions
-    //void setProperty(const std::string& p_name, std::any p_value);
+    void setProperty(const std::string& p_name, std::any p_value);
+
+private:
+    void setDisplayNodeOnControlPoints(bool p_value);
 };
 
